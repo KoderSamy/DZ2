@@ -35,55 +35,82 @@ public class UI
 
     public static void DrawWindow(string title, string content, int selectedItem = 0)
     {
-        int width = Console.WindowWidth - 4;
-        int height = 15;
-        string horizontalBorder = string.Concat(Enumerable.Repeat("─", width));
+        int windowWidth = Console.WindowWidth - 2; // -2 для вертикальных границ
+        string horizontalBorder = string.Concat(Enumerable.Repeat("─", windowWidth));
         string topBorder = $"┌{horizontalBorder}┐";
         string bottomBorder = $"└{horizontalBorder}┘";
 
         Console.WriteLine(topBorder);
-        Console.WriteLine($"│{title.PadLeft((width + title.Length) / 2).PadRight(width)}│");
+        Console.WriteLine($"│{title.PadLeft((windowWidth + title.Length) / 2).PadRight(windowWidth)}│");
         Console.WriteLine($"├{horizontalBorder}┤");
-
-        string[] rows = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-        int numColumns = 2;
 
         if (!string.IsNullOrEmpty(content) && content != "Расписание не найдено.")
         {
-            // Расчет ширины столбцов с учетом разделителей и отступов
-            int columnWidth = (width - (numColumns + 1)) / numColumns; // +1 для правого отступа
+            string[] days = { "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье" };
+            string[] scheduleData = content.Split(';');
+
+            int numColumns = 3;
+            int separatorWidth = (numColumns - 1) * 3; // Ширина разделителей " | "
+            int availableWidth = windowWidth - separatorWidth;  // Доступная ширина для колонок
+            int columnWidth = availableWidth / numColumns;
+
+            // Округление ширины колонок для равномерного распределения
+            int remainder = availableWidth % numColumns;
+            int[] columnWidths = new int[numColumns];
+            for (int i = 0; i < numColumns; i++)
+            {
+                columnWidths[i] = columnWidth + (i < remainder ? 1 : 0);
+            }
 
 
-            string[] headers = { "Кабинет".PadLeft((columnWidth + "Кабинет".Length) / 2).PadRight(columnWidth),
-                                 "Время работы".PadLeft((columnWidth + "Время работы".Length) / 2).PadRight(columnWidth) };
+            string[] headers = {
+                CenterText("День недели", columnWidths[0]),
+                CenterText("Кабинет", columnWidths[1]),
+                CenterText("Время работы", columnWidths[2])
+            };
 
-            Console.WriteLine("│" + string.Join(" │ ", headers) + "│"); // Используем " │ " как разделитель
+            Console.WriteLine($"│{string.Join(" | ", headers)}│");
             Console.WriteLine($"├{horizontalBorder}┤");
 
-            string[] cells = rows[0].Split(';');
-            for (int i = 0; i < cells.Length; i += numColumns)
+            foreach (string day in days)
             {
-                string rowString = "│";
-                for (int j = 0; j < numColumns; j++)
+                List<string[]> entriesForDay = scheduleData.Select(s => s.Split(','))
+                                                            .Where(e => e.Length == 3 && e[0] == day)
+                                                            .ToList();
+
+                if (entriesForDay.Count > 0)
                 {
-                    string cellValue = (i + j < cells.Length ? cells[i + j] : "");
-                    // Добавляем проверку на последний столбец
-                    string separator = (j < numColumns -1 ) ? " │ " : ""; 
-                    rowString += cellValue.PadLeft((columnWidth + cellValue.Length) / 2).PadRight(columnWidth) + separator;
-                }
+                    string dayString = CenterText(day, columnWidths[0]);
 
+                    for (int i = 0; i < entriesForDay.Count; i++)
+                    {
+                        string[] currentEntry = entriesForDay[i];
+                        string cabinetStr = CenterText(currentEntry[1], columnWidths[1]);
+                        string timeStr = CenterText(currentEntry[2], columnWidths[2]);
+                        string dayOutput = (i == 0) ? dayString : new string(' ', columnWidths[0]);
 
-                Console.WriteLine(rowString + "│");
+                        Console.WriteLine($"│{dayOutput} | {cabinetStr} | {timeStr}│");
+                    }
 
-
-                if (i + numColumns < cells.Length)
-                {
-                    Console.WriteLine($"│{new string('─', width)}│");
+                    if (day != days.LastOrDefault(d => scheduleData.Any(s => s.StartsWith(d + ","))))
+                    {
+                        Console.WriteLine($"├{horizontalBorder}┤");
+                    }
                 }
             }
         }
+        else
+        {
+            Console.WriteLine($"│{content.PadLeft((windowWidth + content.Length) / 2).PadRight(windowWidth)}│");
+        }
 
         Console.WriteLine(bottomBorder);
+    }
+
+    public static string CenterText(string text, int width)
+    {
+        int padding = (width - text.Length) / 2;
+        return text.PadLeft(padding + text.Length).PadRight(width);
     }
 
     public static void DrawError(string message)

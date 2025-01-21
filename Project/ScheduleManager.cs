@@ -23,11 +23,11 @@ public class ScheduleManager
             }
 
             // Отладочный вывод (можно удалить после проверки)
-            Console.WriteLine("Содержимое словаря schedule:");
-            foreach (var kvp in schedule)
-            {
-                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
-            }
+            //Console.WriteLine("Содержимое словаря schedule:");
+            //foreach (var kvp in schedule)
+            //{
+            //    Console.WriteLine($"{kvp.Key}: {kvp.Value}");
+            //}
         }
         catch (FileNotFoundException)
         {
@@ -46,6 +46,14 @@ public class ScheduleManager
         {
             UI.DrawWindow($"Расписание врача {doctor}", "Расписание не найдено.");
         }
-        Console.ReadKey(true);
+
+        while (true)
+        {
+            ConsoleKeyInfo key = Console.ReadKey(true);
+            if (key.Key == ConsoleKey.Escape)
+            {
+                break; // Выход из цикла и возврат к авторизации
+            }
+        }
     }
 }

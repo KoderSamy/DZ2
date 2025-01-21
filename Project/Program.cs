@@ -10,17 +10,19 @@ public class Program
         Auth.LoadDoctors();
         ScheduleManager.LoadSchedule();
 
-        string currentDoctor = Auth.Login();
+        while (true) 
+        {
+            string currentDoctor = Auth.Login();
 
-        if (currentDoctor != null)
-        {
-            Console.Clear(); // Очищаем консоль после успешного входа
-            ScheduleManager.ShowSchedule(currentDoctor);
-        }
-        else
-        {
-            Console.WriteLine("Авторизация не выполнена.");
-            Console.ReadKey();
+            if (currentDoctor != null)
+            {
+                Console.Clear();
+                ScheduleManager.ShowSchedule(currentDoctor);
+            }
+            else
+            {
+                break; 
+            }
         }
     }
 }
