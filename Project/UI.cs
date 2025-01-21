@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Text.RegularExpressions; // Добавьте using
 
 public class UI
 {
@@ -46,18 +45,41 @@ public class UI
         Console.WriteLine($"│{title.PadLeft((width + title.Length) / 2).PadRight(width)}│");
         Console.WriteLine($"├{horizontalBorder}┤");
 
-        // Используем Regex для разделения строк:
-        string[] lines = Regex.Split(content, "\r\n|\r|\n"); 
+        string[] rows = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        int numColumns = 2;
 
-        for (int i = 0; i < height - 4; i++)
+        if (!string.IsNullOrEmpty(content) && content != "Расписание не найдено.")
         {
-            if (i < lines.Length)
+            // Расчет ширины столбцов с учетом разделителей и отступов
+            int columnWidth = (width - (numColumns + 1)) / numColumns; // +1 для правого отступа
+
+
+            string[] headers = { "Кабинет".PadLeft((columnWidth + "Кабинет".Length) / 2).PadRight(columnWidth),
+                                 "Время работы".PadLeft((columnWidth + "Время работы".Length) / 2).PadRight(columnWidth) };
+
+            Console.WriteLine("│" + string.Join(" │ ", headers) + "│"); // Используем " │ " как разделитель
+            Console.WriteLine($"├{horizontalBorder}┤");
+
+            string[] cells = rows[0].Split(';');
+            for (int i = 0; i < cells.Length; i += numColumns)
             {
-                Console.WriteLine($"│{lines[i].PadRight(width)}│");
-            }
-            else
-            {
-                Console.WriteLine($"│{" ".PadRight(width)}│");
+                string rowString = "│";
+                for (int j = 0; j < numColumns; j++)
+                {
+                    string cellValue = (i + j < cells.Length ? cells[i + j] : "");
+                    // Добавляем проверку на последний столбец
+                    string separator = (j < numColumns -1 ) ? " │ " : ""; 
+                    rowString += cellValue.PadLeft((columnWidth + cellValue.Length) / 2).PadRight(columnWidth) + separator;
+                }
+
+
+                Console.WriteLine(rowString + "│");
+
+
+                if (i + numColumns < cells.Length)
+                {
+                    Console.WriteLine($"│{new string('─', width)}│");
+                }
             }
         }
 
