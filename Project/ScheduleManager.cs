@@ -12,8 +12,21 @@ public class ScheduleManager
         {
             foreach (var line in File.ReadLines("schedule.txt"))
             {
-                var parts = line.Split(':');
-                schedule[parts[0]] = parts[1];
+                int colonIndex = line.IndexOf(':');
+
+                if (colonIndex != -1)
+                {
+                    string doctor = line.Substring(0, colonIndex);
+                    string scheduleInfo = line.Substring(colonIndex + 1);
+                    schedule[doctor] = scheduleInfo;
+                }
+            }
+
+            // Отладочный вывод (можно удалить после проверки)
+            Console.WriteLine("Содержимое словаря schedule:");
+            foreach (var kvp in schedule)
+            {
+                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
             }
         }
         catch (FileNotFoundException)

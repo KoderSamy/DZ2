@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text.RegularExpressions; // Добавьте using
 
 public class UI
 {
@@ -35,7 +36,6 @@ public class UI
 
     public static void DrawWindow(string title, string content, int selectedItem = 0)
     {
-        // Убрал Console.Clear() отсюда
         int width = Console.WindowWidth - 4;
         int height = 15;
         string horizontalBorder = string.Concat(Enumerable.Repeat("─", width));
@@ -46,18 +46,18 @@ public class UI
         Console.WriteLine($"│{title.PadLeft((width + title.Length) / 2).PadRight(width)}│");
         Console.WriteLine($"├{horizontalBorder}┤");
 
-        string[] lines = content.Split('\n');
+        // Используем Regex для разделения строк:
+        string[] lines = Regex.Split(content, "\r\n|\r|\n"); 
 
         for (int i = 0; i < height - 4; i++)
         {
             if (i < lines.Length)
             {
-                string line = lines[i];
-                Console.WriteLine($"│{line.PadRight(width)}│");
+                Console.WriteLine($"│{lines[i].PadRight(width)}│");
             }
             else
             {
-                Console.WriteLine($"│{"".PadRight(width)}│");
+                Console.WriteLine($"│{" ".PadRight(width)}│");
             }
         }
 
